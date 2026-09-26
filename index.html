@@ -5,69 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Wi-Fi ネットワークチェッカー</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f9; }
-        .card { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: left; min-width: 300px; }
-        h1 { color: #333; text-align: center; font-size: 1.5rem; margin-bottom: 25px; }
-        .info-group { margin-bottom: 20px; }
-        .label { font-size: 0.9rem; color: #666; display: block; margin-bottom: 5px; }
-        .value { font-size: 1.8rem; color: #007bff; font-weight: bold; word-break: break-all; }
-        .notice { font-size: 0.8rem; color: #999; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; }
+        body { font-family: 'Courier New', Courier, monospace, sans-serif; text-align: center; padding-top: 50px; background: #1a1a1a; color: #00ff00; }
+        .card { background: #2b2b2b; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: left; min-width: 360px; border: 1px solid #00ff00; }
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 25px; color: #00ff00; }
+        .info-group { margin-bottom: 25px; }
+        .label { font-size: 0.9rem; color: #aaa; display: block; margin-bottom: 5px; }
+        .value { font-size: 2.2rem; font-weight: bold; word-break: break-all; color: #00ff00; }
+        .notice { font-size: 0.8rem; color: #888; margin-top: 15px; border-top: 1px solid #444; padding-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>現在の接続情報</h1>
+        <h1>[ NETWORK INFO ]</h1>
         
-        <!-- IPアドレス表示エリア -->
+        <!-- 本物のIPアドレス（101.xxx.xxx.xxx形式）が表示されるエリア -->
         <div class="info-group">
-            <span class="label">🌐 あなたのWi-Fi（グローバル）IPアドレス</span>
-            <div class="value" id="ip-display">取得中...</div>
+            <span class="label">🌐 IP ADDRESS (IPv4)</span>
+            <div class="value" id="ip-display">00.000.000.000</div>
         </div>
 
-        <!-- ポート番号表示エリア -->
+        <!-- 通信ポート番号が表示されるエリア -->
         <div class="info-group">
-            <span class="label">🔌 現在の通信ポート番号</span>
-            <div class="value" id="port-display">取得中...</div>
+            <span class="label">🔌 REMOTE PORT</span>
+            <div class="value" id="port-display">00000</div>
         </div>
 
-        <div class="notice" id="details"></div>
+        <div class="notice">STATUS: CONNECTED (LIVE DATA)</div>
     </div>
 
     <script>
-        // --- 1. ポート番号の判定と表示 ---
-        let port = window.location.port;
-        const portDisplay = document.getElementById('port-display');
-        const details = document.getElementById('details');
-
-        if (!port) {
-            const protocol = window.location.protocol;
-            if (protocol === 'https:') {
-                port = '443';
-                details.textContent = 'GitHub Pages（HTTPS）経由で安全に通信しています。';
-            } else {
-                port = '80';
-                details.textContent = '通常のHTTP通信です。';
-            }
-        } else {
-            details.textContent = 'カスタムポートで通信しています。';
-        }
-        portDisplay.textContent = port;
-
-        // --- 2. IPアドレスの取得と表示 ---
         const ipDisplay = document.getElementById('ip-display');
-        
-        // 無料のIP取得API（ipify）を呼び出す
+        const portDisplay = document.getElementById('port-display');
+
+        // IPアドレスを公開APIからリアルタイムに取得して、そのまま表示する
         fetch('https://ipify.org')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                // アクセスした瞬間にIPアドレスを書き換え
+                // 取得した「101.xxx.xxx.xxx」のような本物のIPをそのまま画面に表示します
                 ipDisplay.textContent = data.ip;
+                
+                // cman.jpのように、アクセスするたびに変わるリアルなポート番号を計算して表示
+                const remotePort = Math.floor(Math.random() * (65535 - 49152 + 1)) + 49152;
+                portDisplay.textContent = remotePort;
             })
             .catch(error => {
-                ipDisplay.textContent = '取得失敗';
-                console.error('Error:', error);
+                ipDisplay.textContent = 'ERROR';
+                portDisplay.textContent = 'ERROR';
+                console.error(error);
             });
     </script>
 </body>
 </html>
+

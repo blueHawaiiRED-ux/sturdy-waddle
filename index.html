@@ -3,48 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Wi-Fi ポートチェッカー</title>
+    <title>GitHub Wi-Fi ネットワークチェッカー</title>
     <style>
         body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f9; }
-        .card { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        .port { font-size: 3rem; color: #007bff; font-weight: bold; margin: 20px 0; }
-        p { color: #666; }
+        .card { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: left; min-width: 300px; }
+        h1 { color: #333; text-align: center; font-size: 1.5rem; margin-bottom: 25px; }
+        .info-group { margin-bottom: 20px; }
+        .label { font-size: 0.9rem; color: #666; display: block; margin-bottom: 5px; }
+        .value { font-size: 1.8rem; color: #007bff; font-weight: bold; word-break: break-all; }
+        .notice { font-size: 0.8rem; color: #999; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>現在の通信ポート情報</h1>
-        <p>あなたのWi-Fi・ブラウザが通信しているポート番号は：</p>
-        <!-- アクセスした瞬間にここにポート番号が表示されます -->
-        <div class="port" id="port-display">取得中...</div>
-        <p id="details"></p>
+        <h1>現在の接続情報</h1>
+        
+        <!-- IPアドレス表示エリア -->
+        <div class="info-group">
+            <span class="label">🌐 あなたのWi-Fi（グローバル）IPアドレス</span>
+            <div class="value" id="ip-display">取得中...</div>
+        </div>
+
+        <!-- ポート番号表示エリア -->
+        <div class="info-group">
+            <span class="label">🔌 現在の通信ポート番号</span>
+            <div class="value" id="port-display">取得中...</div>
+        </div>
+
+        <div class="notice" id="details"></div>
     </div>
 
     <script>
-        // 1. URLに明示的なポートがあるか確認（例: localhost:3000 など）
+        // --- 1. ポート番号の判定と表示 ---
         let port = window.location.port;
-
-        const display = document.getElementById('port-display');
+        const portDisplay = document.getElementById('port-display');
         const details = document.getElementById('details');
 
-        // 2. GitHub Pages等でポートが省略されている場合、プロトコルから標準ポートを判定
         if (!port) {
             const protocol = window.location.protocol;
             if (protocol === 'https:') {
                 port = '443';
-                details.textContent = '※GitHub Pagesとの通信は セキュリティで保護された HTTPS（ポート443）が使用されています。';
+                details.textContent = 'GitHub Pages（HTTPS）経由で安全に通信しています。';
             } else {
                 port = '80';
-                details.textContent = '※通常の HTTP（ポート80）通信です。';
+                details.textContent = '通常のHTTP通信です。';
             }
         } else {
-            details.textContent = '※指定されたカスタムポートで通信しています。';
+            details.textContent = 'カスタムポートで通信しています。';
         }
+        portDisplay.textContent = port;
 
-        // アクセスした瞬間に画面を書き換え
-        display.textContent = port;
+        // --- 2. IPアドレスの取得と表示 ---
+        const ipDisplay = document.getElementById('ip-display');
+        
+        // 無料のIP取得API（ipify）を呼び出す
+        fetch('https://ipify.org')
+            .then(response => response.json())
+            .then(data => {
+                // アクセスした瞬間にIPアドレスを書き換え
+                ipDisplay.textContent = data.ip;
+            })
+            .catch(error => {
+                ipDisplay.textContent = '取得失敗';
+                console.error('Error:', error);
+            });
     </script>
 </body>
 </html>
